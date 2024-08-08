@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $searchResults .= '<div class="grid-item">';
                 $searchResults .= '<img src="' . $actorPhoto . '" alt="' . $actorName . '" class="actor-photo">';
-                $searchResults .= '<p>' . $actorName . '</p>';
+                $searchResults .= '<p><a href="https://www.themoviedb.org/person/' . $actorId . '-' . str_replace(' ', '-', $actorName) . '" target="_blank">' . $actorName . '</a></p>';
                 $searchResults .= '<form method="POST">';
                 $searchResults .= '<input type="hidden" name="actorId" value="' . $actorId . '">';
                 $searchResults .= '<button type="submit" name="addToRadarr">Add to Radarr</button>';
