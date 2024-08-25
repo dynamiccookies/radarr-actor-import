@@ -195,14 +195,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
     </div>
     <?= isset($settingsSavedMessage) ? $settingsSavedMessage : '' ?>
-
+    <br><br>
     <form method="POST">
         <label for="actorName">Actor Name:</label>
-        <input type="text" id="actorName" name="actorName" required>
-        <button type="submit">Search</button>
+        <input type="text" id="actorName" name="actorName" required value="<?= htmlspecialchars($_POST['actorName'] ?? '') ?>">
+        <button type="submit">Search</button> <?= isset($radarrMessage) ? $radarrMessage : '' ?>
     </form>
 
     <?= isset($searchResults) ? $searchResults : '' ?>
-    <?= isset($radarrMessage) ? $radarrMessage : '' ?>
 </body>
 </html>
