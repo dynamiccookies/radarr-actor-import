@@ -133,6 +133,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const submitButton         = document.getElementById('saveSettings');
             submitButton.style.display = saveSettingsCheckbox.checked ? 'block' : 'none';
         }
+
+        function fetchRootFolders() {
+            const apiUrl = document.getElementById('radarrServer').value + '/api/v3/rootfolder';
+            const apiKey = document.getElementById('radarrApiKey').value;
+            const rootFolderSelect = document.getElementById('rootFolderPath');
+            const rootFolderSaved = '<?= (isset($settings['rootFolderPath']) ? $settings['rootFolderPath'] : '');?>';
+
+            fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'X-Api-Key': apiKey
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                rootFolderSelect.innerHTML = ''; // Clear existing options
+
+                data.forEach(folder => {
+                    const option       = document.createElement('option');
+                    option.value       = folder.path;
+                    option.textContent = folder.path;
+
+                    if (folder.path == rootFolderSaved) {option.selected = true;}
+
+                    rootFolderSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching root folders:', error)
+                rootFolderSelect.innerHTML = ''; // Clear existing options
+
+            });
+        }
+
+        function fetchQualityProfiles() {
+            const apiUrl = document.getElementById('radarrServer').value + '/api/v3/qualityprofile';
+            const apiKey = document.getElementById('radarrApiKey').value;
+            const qualityProfileSelect = document.getElementById('qualityProfile');
+            const qualityProfileSaved = '<?= (isset($settings['qualityProfile']) ? $settings['qualityProfile'] : '');?>';
+
+            fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'X-Api-Key': apiKey
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                qualityProfileSelect.innerHTML = ''; // Clear existing options
+
+                data.forEach(profile => {
+                    const option       = document.createElement('option');
+                    option.value       = profile.name;
+                    option.textContent = profile.name;
+
+                    if (profile.name == qualityProfileSaved) {option.selected = true;}
+                    
+                    qualityProfileSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching quality profiles:', error)
+                qualityProfileSelect.innerHTML = ''; // Clear existing options
+
+            });
+        }
+
+        window.onload = function() {
+            fetchRootFolders();
+            fetchQualityProfiles();
+        };
     </script>
 </head>
 <body>
@@ -142,19 +213,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h2>Settings</h2>
         <form method="POST">
             <label for="radarrServer">Radarr Server & Port:</label>
-            <input type="text" id="radarrServer" name="radarrServer" value="<?= htmlspecialchars($settings['radarrServer'] ?? '') ?>">
+            <input type="text" id="radarrServer" name="radarrServer" value="<?= htmlspecialchars($settings['radarrServer'] ?? '') ?>" oninput="fetchRootFolders(); fetchQualityProfiles();">
             <br><br>
             <label for="radarrApiKey">Radarr API Key:</label>
-            <input type="text" id="radarrApiKey" name="radarrApiKey" value="<?= htmlspecialchars($settings['radarrApiKey'] ?? '') ?>">
+            <input type="text" id="radarrApiKey" name="radarrApiKey" value="<?= htmlspecialchars($settings['radarrApiKey'] ?? '') ?>" oninput="fetchRootFolders(); fetchQualityProfiles();">
             <br><br>
             <label for="tmdbApiKey">TMDB API Key:</label>
             <input type="text" id="tmdbApiKey" name="tmdbApiKey" value="<?= htmlspecialchars($settings['tmdbApiKey'] ?? '') ?>">
             <br><br>
             <label for="rootFolderPath">Root Folder Path:</label>
-            <input type="text" id="rootFolderPath" name="rootFolderPath" value="<?= htmlspecialchars($settings['rootFolderPath'] ?? '') ?>">
+            <select id="rootFolderPath" name="rootFolderPath">
+                <!-- Root folder options will be populated by JavaScript -->
+            </select>
             <br><br>
             <label for="qualityProfile">Quality Profile:</label>
-            <input type="text" id="qualityProfile" name="qualityProfile" value="<?= htmlspecialchars($settings['qualityProfile'] ?? '') ?>">
+            <select id="qualityProfile" name="qualityProfile">
+                <!-- Quality profile options will be populated by JavaScript -->
+            </select>
             <br><br>
             <label for="minAvailability">Minimum Availability:</label>
             <select id="minAvailability" name="minAvailability">
