@@ -200,9 +200,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
         }
 
+        function fetchLists() {
+            const apiUrl = document.getElementById('radarrServer').value + '/api/v3/importlist';
+            const apiKey = document.getElementById('radarrApiKey').value;
+            listIds = [];
+
+            fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'X-Api-Key': apiKey
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(lists => {
+                    if (lists.fields[0].name == 'personId') {
+                        listIds.push(lists.fields[0].value);
+                    }
+                });
+
+                document.querySelectorAll('.grid-item').forEach(gridItem => {
+                    const actorId = gridItem.querySelector('input[name="actorId"]').value;
+                    const button  = gridItem.querySelector('button[name="addToRadarr"]');
+                    const name    = gridItem.querySelector('a').textContent;
+
+                    if (listIds.includes(actorId)) {
+                        button.disabled = true;
+                        gridItem.title  = name + '\'s list already exists'; // Set hover text on the grid-item
+                    }
+                });
+
+            })
+            .catch(error => {
+                console.error('Error fetching quality profiles:', error)
+            });
+        }
+
         window.onload = function() {
             fetchRootFolders();
             fetchQualityProfiles();
+            fetchLists();
         };
     </script>
 </head>
