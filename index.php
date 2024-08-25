@@ -1,11 +1,10 @@
 <?php
 // Load settings from file
 $settingsFile = 'settings.ini.php';
-$settings = [];
-if (file_exists($settingsFile)) {
-    $settings = parse_ini_file($settingsFile);
-}
+$settings     = [];
+if (file_exists($settingsFile)) {$settings = parse_ini_file($settingsFile);}
 
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isset($_POST['saveSettings'])) {
@@ -125,13 +124,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
     <script>
         function toggleSettings() {
-            const settingsSection = document.getElementById('settings-section');
+            const settingsSection         = document.getElementById('settings-section');
             settingsSection.style.display = settingsSection.style.display != 'block' ? 'block' : 'none';
         }
 
         function toggleSubmitButton() {
             const saveSettingsCheckbox = document.getElementById('settings');
-            const submitButton = document.getElementById('saveSettings');
+            const submitButton         = document.getElementById('saveSettings');
             submitButton.style.display = saveSettingsCheckbox.checked ? 'block' : 'none';
         }
     </script>
@@ -159,9 +158,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <br><br>
             <label for="minAvailability">Minimum Availability:</label>
             <select id="minAvailability" name="minAvailability">
-                <option value="announced" <?= isset($settings['minAvailability']) && $settings['minAvailability'] == 'announced' ? 'selected' : '' ?>>Announced</option>
-                <option value="in_cinemas" <?= isset($settings['minAvailability']) && $settings['minAvailability'] == 'in_cinemas' ? 'selected' : '' ?>>In Cinemas</option>
-                <option value="released" <?= isset($settings['minAvailability']) && $settings['minAvailability'] == 'released' ? 'selected' : '' ?>>Released</option>
+                <option value="announced"<?= isset($settings['minAvailability']) && $settings['minAvailability'] == 'announced' ? ' selected' : '' ?>>Announced</option>
+                <option value="in_cinemas"<?= isset($settings['minAvailability']) && $settings['minAvailability'] == 'in_cinemas' ? ' selected' : '' ?>>In Cinemas</option>
+                <option value="released"<?= isset($settings['minAvailability']) && $settings['minAvailability'] == 'released' ? ' selected' : '' ?>>Released</option>
             </select>
             <br><br>
             <label for="monitor">Monitor:</label>
