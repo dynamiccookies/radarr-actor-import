@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $settings['radarrServer']          = $_POST['radarrServer'];
         $settings['radarrApiKey']          = $_POST['radarrApiKey'];
         $settings['tmdbApiKey']            = $_POST['tmdbApiKey'];
-        $settings['listNamePattern']       = $_POST['listNamePattern'];
+//      $settings['listNamePattern']       = $_POST['listNamePattern'];
         $settings['rootFolderPath']        = $_POST['rootFolderPath'];
         $settings['qualityProfile']        = $_POST['qualityProfile'];
         $settings['minAvailability']       = $_POST['minAvailability'];
@@ -261,9 +261,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <br><br>
             <label for="tmdbApiKey">TMDB API Key:</label>
             <input type="text" id="tmdbApiKey" name="tmdbApiKey" value="<?= htmlspecialchars($settings['tmdbApiKey'] ?? '') ?>">
+<!-- Will look into adding this functionality in the future
             <br><br>
             <label for="listNamePattern">List Name Pattern:</label>
             <input type="text" id="listNamePattern" name="listNamePattern" value="<?= htmlspecialchars($settings['listNamePattern'] ?? '') ?>">
+-->
             <br><br>
             <label for="rootFolderPath">Root Folder Path:</label>
             <select id="rootFolderPath" name="rootFolderPath">
