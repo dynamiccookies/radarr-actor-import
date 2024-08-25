@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $settings['radarrServer']          = $_POST['radarrServer'];
         $settings['radarrApiKey']          = $_POST['radarrApiKey'];
         $settings['tmdbApiKey']            = $_POST['tmdbApiKey'];
+        $settings['listNamePattern']       = $_POST['listNamePattern'];
         $settings['rootFolderPath']        = $_POST['rootFolderPath'];
         $settings['qualityProfile']        = $_POST['qualityProfile'];
         $settings['minAvailability']       = $_POST['minAvailability'];
@@ -22,6 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $settings['personProducerCredits'] = isset($_POST['personProducerCredits']);
         $settings['personSoundCredits']    = isset($_POST['personSoundCredits']);
         $settings['personWritingCredits']  = isset($_POST['personWritingCredits']);
+        $settings['enableList']            = isset($_POST['enableList']);
+        $settings['enableAutomaticAdd']    = isset($_POST['enableAutomaticAdd']);
+        $settings['searchOnAdd']           = isset($_POST['searchOnAdd']);
 
         $settingsContent = '';
         foreach ($settings as $key => $value) {
@@ -258,6 +262,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label for="tmdbApiKey">TMDB API Key:</label>
             <input type="text" id="tmdbApiKey" name="tmdbApiKey" value="<?= htmlspecialchars($settings['tmdbApiKey'] ?? '') ?>">
             <br><br>
+            <label for="listNamePattern">List Name Pattern:</label>
+            <input type="text" id="listNamePattern" name="listNamePattern" value="<?= htmlspecialchars($settings['listNamePattern'] ?? '') ?>">
+            <br><br>
             <label for="rootFolderPath">Root Folder Path:</label>
             <select id="rootFolderPath" name="rootFolderPath">
                 <!-- Root folder options will be populated by JavaScript -->
@@ -281,6 +288,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <option value="movie_and_collection" <?= isset($settings['monitor']) && $settings['monitor'] == 'movie_and_collection' ? 'selected' : '' ?>>Movie and Collection</option>
                 <option value="none" <?= isset($settings['monitor']) && $settings['monitor'] == 'none' ? 'selected' : '' ?>>None</option>
             </select>
+            <br><br>
+            <label for="enableList">Enable List:</label>
+            <input type="checkbox" id="enableList" name="enableList" <?= !empty($settings['enableList']) ? 'checked' : '' ?>>
+            <br><br>
+            <label for="enableAutomaticAdd">Enable Automatic Add:</label>
+            <input type="checkbox" id="enableAutomaticAdd" name="enableAutomaticAdd" <?= !empty($settings['enableAutomaticAdd']) ? 'checked' : '' ?>>
+            <br><br>
+            <label for="searchOnAdd">Search on Add:</label>
+            <input type="checkbox" id="searchOnAdd" name="searchOnAdd" <?= !empty($settings['searchOnAdd']) ? 'checked' : '' ?>>
             <br><br>
             <label for="createTag">Create Tag:</label>
             <input type="checkbox" id="createTag" name="createTag" <?= !empty($settings['createTag']) ? 'checked' : '' ?>>
