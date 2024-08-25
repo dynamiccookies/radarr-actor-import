@@ -66,38 +66,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $searchResults = '<p>No actors found.</p>';
         }
     }
-
-    if (isset($_POST['addToRadarr']) && !empty($_POST['actorId'])) {
-        $actorId      = htmlspecialchars($_POST['actorId']);
-        $radarrServer = htmlspecialchars($settings['radarrServer']);
-        $radarrApiKey = htmlspecialchars($settings['radarrApiKey']);
-
-        // Add actor to Radarr
-        $radarrEndpoint = $radarrServer . '/api/v3/importlist';
-
-        $postData = json_encode([
-            'name' => 'RefreshMovie',
-            'personIds' => [$actorId]
-        ]);
-
-        $ch = curl_init($radarrEndpoint);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'X-Api-Key: ' . $radarrApiKey
-        ]);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-
-        $response = curl_exec($ch);
-        curl_close($ch);
-
-        if ($response) {
-            $radarrMessage = '<p>Actor added to Radarr successfully.</p>';
-        } else {
-            $radarrMessage = '<p>Failed to add actor to Radarr.</p>';
-        }
-    }
 }
 ?>
 
