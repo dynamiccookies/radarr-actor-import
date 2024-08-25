@@ -171,27 +171,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </select>
             <br><br>
             <label for="createTag">Create Tag:</label>
-            <input type="checkbox" id="createTag" name="createTag" <?= isset($settings['createTag']) && $settings['createTag'] ? 'checked' : '' ?>>
+            <input type="checkbox" id="createTag" name="createTag" <?= !empty($settings['createTag']) ? 'checked' : '' ?>>
             <br><br>
             <label for="personCast">Person Cast:</label>
-            <input type="checkbox" id="personCast" name="personCast" <?= isset($settings['personCast']) && $settings['personCast'] ? 'checked' : '' ?>>
+            <input type="checkbox" id="personCast" name="personCast" <?= !empty($settings['personCast']) ? 'checked' : '' ?>>
             <br><br>
             <label for="personDirectorCredits">Person Director Credits:</label>
-            <input type="checkbox" id="personDirectorCredits" name="personDirectorCredits" <?= isset($settings['personDirectorCredits']) && $settings['personDirectorCredits'] ? 'checked' : '' ?>>
+            <input type="checkbox" id="personDirectorCredits" name="personDirectorCredits" <?= !empty($settings['personDirectorCredits']) ? 'checked' : '' ?>>
             <br><br>
             <label for="personProducerCredits">Person Producer Credits:</label>
-            <input type="checkbox" id="personProducerCredits" name="personProducerCredits" <?= isset($settings['personProducerCredits']) && $settings['personProducerCredits'] ? 'checked' : '' ?>>
+            <input type="checkbox" id="personProducerCredits" name="personProducerCredits" <?= !empty($settings['personProducerCredits']) ? 'checked' : '' ?>>
             <br><br>
             <label for="personSoundCredits">Person Sound Credits:</label>
-            <input type="checkbox" id="personSoundCredits" name="personSoundCredits" <?= isset($settings['personSoundCredits']) && $settings['personSoundCredits'] ? 'checked' : '' ?>>
+            <input type="checkbox" id="personSoundCredits" name="personSoundCredits" <?= !empty($settings['personSoundCredits']) ? 'checked' : '' ?>>
             <br><br>
             <label for="personWritingCredits">Person Writing Credits:</label>
-            <input type="checkbox" id="personWritingCredits" name="personWritingCredits" <?= isset($settings['personWritingCredits']) && $settings['personWritingCredits'] ? 'checked' : '' ?>>
+            <input type="checkbox" id="personWritingCredits" name="personWritingCredits" <?= !empty($settings['personWritingCredits']) ? 'checked' : '' ?>>
             <br><br>
-            <label for="settings">Save Settings:</label>
-            <input type="checkbox" id="settings" name="settings" onclick="toggleSubmitButton()">
-            <br><br>
-            <button type="submit" id="saveSettings" name="saveSettings">Submit</button>
+            <input type="checkbox" id="settings" name="settings" onchange="toggleSubmitButton()"> Save Settings
+            <input type="submit" id="saveSettings" name="saveSettings" value="Save Settings">
         </form>
     </div>
     <?= isset($settingsSavedMessage) ? $settingsSavedMessage : '' ?>
