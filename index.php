@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             width: 100%;
             height: auto;
         }
-        .settings-section, #saveSettings {
+        .settings-section {
             display: none;
         }
     </style>
@@ -98,12 +98,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         function toggleSettings() {
             const settingsSection         = document.getElementById('settings-section');
             settingsSection.style.display = settingsSection.style.display != 'block' ? 'block' : 'none';
-        }
-
-        function toggleSubmitButton() {
-            const saveSettingsCheckbox = document.getElementById('settings');
-            const submitButton         = document.getElementById('saveSettings');
-            submitButton.style.display = saveSettingsCheckbox.checked ? 'block' : 'none';
         }
 
         function fetchRootFolders() {
@@ -456,7 +450,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label for="personWritingCredits">Person Writing Credits:</label>
             <input type="checkbox" id="personWritingCredits" name="personWritingCredits" <?= !empty($settings['personWritingCredits']) ? 'checked' : '' ?>>
             <br><br>
-            <input type="checkbox" id="settings" name="settings" onchange="toggleSubmitButton()"> Save Settings
             <input type="submit" id="saveSettings" name="saveSettings" value="Save Settings">
         </form>
     </div>
