@@ -36,21 +36,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!empty($_POST['actorName'])) {
-        $actorName  = htmlspecialchars($_POST['actorName']);
-        $tmdbApiKey = $settings['tmdbApiKey'];
-
-        // Fetch actors from TMDB
-        $tmdbUrl       = "https://api.themoviedb.org/3/search/person?api_key={$tmdbApiKey}&query=" . urlencode($actorName);
-        $tmdbResponse  = file_get_contents($tmdbUrl);
-        $tmdbData      = json_decode($tmdbResponse, true);
-        $searchResults = '';
-
-        if (!empty($tmdbData['results'])) {
-            $searchResults .= '<div class="grid-container">';
-            foreach ($tmdbData['results'] as $actor) {
+        $actorName    = htmlspecialchars($_POST['actorName']);
+        $defaultPages = 10;
+        $tmdbApiKey   = $settings['tmdbApiKey'];
+        $pagesToFetch = isset($_POST['pagesToFetch']) ? intval($_POST['pagesToFetch']) : $defaultPages;
+    
+        $actors = [];
+        $page = 1;
+    
+        while ($page <= $pagesToFetch) {
+            // Fetch actors from TMDB
+            $tmdbUrl = "https://api.themoviedb.org/3/search/person?api_key={$tmdbApiKey}&query=" . urlencode($actorName) . "&page=" . $page;
+            $tmdbResponse = file_get_contents($tmdbUrl);
+            $tmdbData = json_decode($tmdbResponse, true);
+    
+            if (!empty($tmdbData['results'])) {
+                foreach ($tmdbData['results'] as $actor) {
+                    $actors[] = [
+                        'id'         => $actor['id'],
+                        'name'       => $actor['name'],
+                        'gender'     => $actor['gender'],
+                        'photo'      => !empty($actor['profile_path']) ? 'https://image.tmdb.org/t/p/w500' . $actor['profile_path'] : 'https://dummyimage.com/200x300/cccccc/000.png&text=No%20Image%20Available',
+                        'popularity' => $actor['popularity']
+                    ];
+                }
+                $page++;
+            } else {
+                break; // No more results, exit loop
+            }
+        }
+    
+        // Sort actors array by name
+/*        usort($actors, function($a, $b) {
+            return strcmp($a['name'], $b['name']);
+        });
+*/
+        // Sort actors array by popularity
+        usort($actors, function($a, $b) {
+            return $b['popularity'] - $a['popularity'];
+        });
+    
+        // Generate HTML from sorted actors
+        if (!empty($actors)) {
+            $searchResults = '<div class="grid-container">';
+            foreach ($actors as $actor) {
                 $actorId = $actor['id'];
                 $actorName = $actor['name'];
-                $actorPhoto = !empty($actor['profile_path']) ? 'https://image.tmdb.org/t/p/w500' . $actor['profile_path'] : 'https://dummyimage.com/200x300/cccccc/000.png&text=No%20Image%20Available';
+                $actorPhoto = $actor['photo'];
 
                 $searchResults .= '<div class="grid-item">';
                 $searchResults .= '<img src="' . $actorPhoto . '" alt="' . $actorName . '" class="actor-photo">';
@@ -223,7 +255,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         form#actor-form input[type="text"] {
             text-align: center;
         }
-        
+
         form#actor-form button {
             width: 25%;
             margin: auto;
