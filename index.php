@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $searchResults .= '<p><a href="https://www.themoviedb.org/person/' . $actorId . '-' . str_replace(' ', '-', $actorName) . '" target="_blank">' . $actorName . '</a></p>';
                 $searchResults .= '<form method="POST">';
                 $searchResults .= '<input type="hidden" name="actorId" value="' . $actorId . '">';
-                $searchResults .= '<button type="submit" name="addToRadarr">Add to Radarr</button>';
+                $searchResults .= '<button type="button" name="addToRadarr" onclick="createList(\'' . $actorId . '\',\'' . $actorName . '\')">Add to Radarr</button>';
                 $searchResults .= '</form>';
                 $searchResults .= '</div>';
             }
@@ -157,11 +157,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 data.forEach(profile => {
                     const option       = document.createElement('option');
-                    option.value       = profile.name;
+                    option.value       = profile.id;
                     option.textContent = profile.name;
 
-                    if (profile.name == qualityProfileSaved) {option.selected = true;}
-                    
+                    if (profile.id == qualityProfileSaved) {option.selected = true;}
+
                     qualityProfileSelect.appendChild(option);
                 });
             })
@@ -206,6 +206,176 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             .catch(error => {
                 console.error('Error fetching quality profiles:', error)
             });
+        }
+
+        function createList(id, name) {
+            const apiUrl = document.getElementById('radarrServer').value + '/api/v3/importlist';
+            const apiKey = document.getElementById('radarrApiKey').value;
+
+            createTag(name, apiKey).then(tag => {
+                const postData = generatePostData(id, name, tag);
+
+                fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Api-Key': apiKey
+                    },
+                    body: JSON.stringify(postData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        document.getElementById('radarrMessage').innerHTML = name + '\'s list added successfully!';
+                    } else {
+                        alert('Failed to add actor to Radarr.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to add actor to Radarr.');
+                });
+
+            });
+        }
+
+        async function createTag(actorName, apiKey) {
+            const apiUrl        = document.getElementById('radarrServer').value + '/api/v3/tag';
+            const convertedName = actorName.toLowerCase().replace(/ /g, '_');
+
+            try {
+                // Step 1: Fetch existing tags
+                const response = await fetch(`${apiUrl}?apikey=${apiKey}`);
+                const tags     = await response.json();
+
+                // Step 2: Check if the tag already exists
+                const existingTag = tags.find(tag => tag.label === convertedName);
+                if (existingTag) {
+                    return [existingTag.id];
+                }
+
+                // Step 3: If the tag doesn't exist, create a new one
+                const newTagResponse = await fetch(`${apiUrl}?apikey=${apiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: 0, label: convertedName })
+                });
+
+                if (!newTagResponse.ok) {
+                    throw new Error('Failed to create new tag');
+                }
+
+                const newTag = await newTagResponse.json();
+
+                // Step 4: Return the new tag's ID
+                return [newTag.id];
+
+            } catch (error) {
+                console.error('Error handling actor tag:', error);
+                return [];
+            }
+        }
+
+        function generatePostData(id, name, tag) {
+            return {
+                "id": 0,
+                "name": name,
+                "fields": [
+                    {
+                        "order": 0,
+                        "name": "personId",
+                        "label": "PersonId",
+                        "helpText": "TMDb Id of Person to Follow",
+                        "value": id,
+                        "type": "textbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    },
+                    {
+                        "order": 1,
+                        "name": "personCast",
+                        "label": "Person Cast",
+                        "helpText": "Select if you want to include Cast credits",
+                        "value": isChecked('personCast'),
+                        "type": "checkbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    },
+                    {
+                        "order": 2,
+                        "name": "personCastDirector",
+                        "label": "Person Director Credits",
+                        "helpText": "Select if you want to include Director credits",
+                        "value": isChecked('personDirectorCredits'),
+                        "type": "checkbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    },
+                    {
+                        "order": 3,
+                        "name": "personCastProducer",
+                        "label": "Person Producer Credits",
+                        "helpText": "Select if you want to include Producer credits",
+                        "value": isChecked('personProducerCredits'),
+                        "type": "checkbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    },
+                    {
+                        "order": 4,
+                        "name": "personCastSound",
+                        "label": "Person Sound Credits",
+                        "helpText": "Select if you want to include Sound credits",
+                        "value": isChecked('personSoundCredits'),
+                        "type": "checkbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    },
+                    {
+                        "order": 5,
+                        "name": "personCastWriting",
+                        "label": "Person Writing Credits",
+                        "helpText": "Select if you want to include Writing credits",
+                        "value": isChecked('personWritingCredits'),
+                        "type": "checkbox",
+                        "advanced": false,
+                        "privacy": "normal",
+                        "isFloat": false
+                    }
+                ],
+                "implementationName": "TMDb Person",
+                "implementation": "TMDbPersonImport",
+                "configContract": "TMDbPersonSettings",
+                "infoLink": "https://wiki.servarr.com/radarr/supported#tmdbpersonimport",
+                "tags": isChecked('createTag') ? tag : [],
+                "enabled": isChecked('enableList'),
+                "enableAuto": isChecked('enableAutomaticAdd'),
+                "monitor": getSelectedValue('monitor'),
+                "rootFolderPath": getSelectedValue('rootFolderPath'),
+                "qualityProfileId": getSelectedValue('qualityProfile'),
+                "searchOnAdd": isChecked('searchOnAdd'),
+                "minimumAvailability": getSelectedValue('minAvailability'),
+                "listType": "tmdb",
+                "listOrder": 1,
+                "minRefreshInterval": "12:00:00"
+            };
+        }
+
+        // Function to get selected value from a select element
+        function getSelectedValue(id) {
+            return document.getElementById(id)?.value ?? '';
+        }
+
+        // Function to check if a checkbox is checked
+        function isChecked(id) {
+            return document.getElementById(id)?.checked ?? false;
         }
 
         window.onload = function() {
@@ -254,8 +424,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <br><br>
             <label for="monitor">Monitor:</label>
             <select id="monitor" name="monitor">
-                <option value="movie_only" <?= isset($settings['monitor']) && $settings['monitor'] == 'movie_only' ? 'selected' : '' ?>>Movie Only</option>
-                <option value="movie_and_collection" <?= isset($settings['monitor']) && $settings['monitor'] == 'movie_and_collection' ? 'selected' : '' ?>>Movie and Collection</option>
+                <option value="movieOnly" <?= isset($settings['monitor']) && $settings['monitor'] == 'movieOnly' ? 'selected' : '' ?>>Movie Only</option>
+                <option value="movieAndCollection" <?= isset($settings['monitor']) && $settings['monitor'] == 'movieAndCollection' ? 'selected' : '' ?>>Movie and Collection</option>
                 <option value="none" <?= isset($settings['monitor']) && $settings['monitor'] == 'none' ? 'selected' : '' ?>>None</option>
             </select>
             <br><br>
@@ -295,7 +465,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <form method="POST">
         <label for="actorName">Actor Name:</label>
         <input type="text" id="actorName" name="actorName" required value="<?= htmlspecialchars($_POST['actorName'] ?? '') ?>">
-        <button type="submit">Search</button> <?= isset($radarrMessage) ? $radarrMessage : '' ?>
+        <button type="submit">Search</button> <div id='radarrMessage'></div>
     </form>
 
     <?= isset($searchResults) ? $searchResults : '' ?>
