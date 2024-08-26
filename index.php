@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!empty($_POST['actorName'])) {
         $actorName    = htmlspecialchars($_POST['actorName']);
-        $defaultPages = 10;
+        $defaultPages = 20;
         $tmdbApiKey   = $settings['tmdbApiKey'];
         $pagesToFetch = isset($_POST['pagesToFetch']) ? intval($_POST['pagesToFetch']) : $defaultPages;
     
@@ -52,12 +52,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
             if (!empty($tmdbData['results'])) {
                 foreach ($tmdbData['results'] as $actor) {
+
+                // Initialize known_for array
+                $knownForTitles = [];
+                
+                // Loop through the known_for array and get the titles
+                if (!empty($actor['known_for'])) {
+                    foreach ($actor['known_for'] as $knownForItem) {
+                        $knownForTitles[] = $knownForItem['title'] ?? $knownForItem['name'];
+                    }
+                }
+                
+                // Add the actor's data, including known_for, to the $actors array
                     $actors[] = [
                         'id'         => $actor['id'],
                         'name'       => $actor['name'],
                         'gender'     => $actor['gender'],
                         'photo'      => !empty($actor['profile_path']) ? 'https://image.tmdb.org/t/p/w500' . $actor['profile_path'] : 'https://dummyimage.com/200x300/cccccc/000.png&text=No%20Image%20Available',
-                        'popularity' => $actor['popularity']
+                        'popularity' => $actor['popularity'],
+                        'known_for'  => $knownForTitles // Assign the array of known_for titles
                     ];
                 }
                 $page++;
