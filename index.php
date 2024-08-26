@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $settingsContent .= "$key = " . (is_bool($value) ? ($value ? 'true' : 'false') : $value) . "\n";
         }
         file_put_contents($settingsFile, $settingsContent);
-        $settingsSavedMessage = '<p>Settings saved successfully.</p>';
+        $settingsSavedMessage = '<p class="save-settings">Settings saved successfully.</p>';
     }
 
     if (!empty($_POST['actorName'])) {
@@ -40,11 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $tmdbApiKey = $settings['tmdbApiKey'];
 
         // Fetch actors from TMDB
-        $tmdbUrl = "https://api.themoviedb.org/3/search/person?api_key={$tmdbApiKey}&query=" . urlencode($actorName);
-        $tmdbResponse = file_get_contents($tmdbUrl);
-        $tmdbData = json_decode($tmdbResponse, true);
-
+        $tmdbUrl       = "https://api.themoviedb.org/3/search/person?api_key={$tmdbApiKey}&query=" . urlencode($actorName);
+        $tmdbResponse  = file_get_contents($tmdbUrl);
+        $tmdbData      = json_decode($tmdbResponse, true);
         $searchResults = '';
+
         if (!empty($tmdbData['results'])) {
             $searchResults .= '<div class="grid-container">';
             foreach ($tmdbData['results'] as $actor) {
@@ -167,6 +167,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             cursor: pointer;
         }
 
+        button:disabled, button:disabled:hover {
+            background-color: #ccc;
+            color: #666;
+            cursor: not-allowed;
+            border: 1px solid #999;
+        }
+
         button:hover {
             background: #0056b3;
         }
@@ -191,11 +198,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: block;
             margin-top: 10px;
         }
-        
+
+        p.save-settings {
+            width: auto;
+            font-weight: bold;
+            padding: 10px;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 16px;
+            max-width: 300px;
+            margin: auto;
+            margin-top: 10px;
+        }
+
         form#actor-form {
             width: 50%;
             margin: auto;
             margin-bottom: 25px;
+        }
+
+        form#actor-form input[type="text"] {
+            text-align: center;
+        }
+        
+        form#actor-form button {
+            width: 25%;
+            margin: auto;
+            margin-top: 10px;
         }
 
     </style>
@@ -486,7 +518,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <header>
-        <h1>Search Actor and Add to Radarr</h1>
+        <h1>Add Actor List to Radarr</h1>
         <button onclick="toggleSettings()">Toggle Settings</button>
     </header>
 
@@ -576,8 +608,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?= isset($settingsSavedMessage) ? $settingsSavedMessage : '' ?>
     <br>
     <form id='actor-form' method="POST">
-        <label for="actorName">Actor Name:</label>
-        <input type="text" id="actorName" name="actorName" required value="<?= htmlspecialchars($_POST['actorName'] ?? '') ?>">
+        <input type="text" id="actorName" name="actorName" placeholder="Search Actor Name" required value="<?= htmlspecialchars($_POST['actorName'] ?? '') ?>">
         <button type="submit">Search</button> <div id='radarrMessage'></div>
     </form>
 
