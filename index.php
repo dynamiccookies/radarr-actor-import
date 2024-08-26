@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Actor Search and Radarr Import</title>
+    <title>Add Actor Import Lists to Radarr</title>
     <style>
         .grid-container {
             display: grid;
@@ -92,7 +92,112 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .settings-section {
             display: none;
+            background: #fff;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        input[type="submit"] {
+            background: #28a745;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background: #218838;
+        }
+        button {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            margin-top: 10px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #radarrMessage {
+            margin-top: 10px;
+        }
+        table {
+            width: 100%;
+            table-layout: auto;
+        }
+
+        td {
+            width: 50%;
+            white-space: nowrap;
+            padding: 0 50px;
+            vertical-align: top;
+        }
+
+        #saveSettings {
+            margin: auto;
+            display: block;
+            margin-top: 10px;
+        }
+        
+        form#actor-form {
+            width: 50%;
+            margin: auto;
+            margin-bottom: 25px;
+        }
+
     </style>
     <script>
         function toggleSettings() {
@@ -380,82 +485,97 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>
 </head>
 <body>
-    <h1>Search Actor and Add to Radarr</h1>
-    <button onclick="toggleSettings()">Toggle Settings</button>
-    <div id="settings-section" class="settings-section">
+    <header>
+        <h1>Search Actor and Add to Radarr</h1>
+        <button onclick="toggleSettings()">Toggle Settings</button>
+    </header>
+
+    <section id="settings-section" class="settings-section">
         <h2>Settings</h2>
         <form method="POST">
-            <label for="radarrServer">Radarr Server & Port:</label>
-            <input type="text" id="radarrServer" name="radarrServer" value="<?= htmlspecialchars($settings['radarrServer'] ?? '') ?>" oninput="fetchRootFolders(); fetchQualityProfiles();">
-            <br><br>
-            <label for="radarrApiKey">Radarr API Key:</label>
-            <input type="text" id="radarrApiKey" name="radarrApiKey" value="<?= htmlspecialchars($settings['radarrApiKey'] ?? '') ?>" oninput="fetchRootFolders(); fetchQualityProfiles();">
-            <br><br>
-            <label for="tmdbApiKey">TMDB API Key:</label>
-            <input type="text" id="tmdbApiKey" name="tmdbApiKey" value="<?= htmlspecialchars($settings['tmdbApiKey'] ?? '') ?>">
-<!-- Will look into adding this functionality in the future
-            <br><br>
-            <label for="listNamePattern">List Name Pattern:</label>
-            <input type="text" id="listNamePattern" name="listNamePattern" value="<?= htmlspecialchars($settings['listNamePattern'] ?? '') ?>">
--->
-            <br><br>
-            <label for="rootFolderPath">Root Folder Path:</label>
-            <select id="rootFolderPath" name="rootFolderPath">
-                <!-- Root folder options will be populated by JavaScript -->
-            </select>
-            <br><br>
-            <label for="qualityProfile">Quality Profile:</label>
-            <select id="qualityProfile" name="qualityProfile">
-                <!-- Quality profile options will be populated by JavaScript -->
-            </select>
-            <br><br>
-            <label for="minAvailability">Minimum Availability:</label>
-            <select id="minAvailability" name="minAvailability">
-                <option value="announced"<?= isset($settings['minAvailability']) && $settings['minAvailability'] == 'announced' ? ' selected' : '' ?>>Announced</option>
-                <option value="in_cinemas"<?= isset($settings['minAvailability']) && $settings['minAvailability'] == 'in_cinemas' ? ' selected' : '' ?>>In Cinemas</option>
-                <option value="released"<?= isset($settings['minAvailability']) && $settings['minAvailability'] == 'released' ? ' selected' : '' ?>>Released</option>
-            </select>
-            <br><br>
-            <label for="monitor">Monitor:</label>
-            <select id="monitor" name="monitor">
-                <option value="movieOnly" <?= isset($settings['monitor']) && $settings['monitor'] == 'movieOnly' ? 'selected' : '' ?>>Movie Only</option>
-                <option value="movieAndCollection" <?= isset($settings['monitor']) && $settings['monitor'] == 'movieAndCollection' ? 'selected' : '' ?>>Movie and Collection</option>
-                <option value="none" <?= isset($settings['monitor']) && $settings['monitor'] == 'none' ? 'selected' : '' ?>>None</option>
-            </select>
-            <br><br>
-            <label for="enableList">Enable List:</label>
-            <input type="checkbox" id="enableList" name="enableList" <?= !empty($settings['enableList']) ? 'checked' : '' ?>>
-            <br><br>
-            <label for="enableAutomaticAdd">Enable Automatic Add:</label>
-            <input type="checkbox" id="enableAutomaticAdd" name="enableAutomaticAdd" <?= !empty($settings['enableAutomaticAdd']) ? 'checked' : '' ?>>
-            <br><br>
-            <label for="searchOnAdd">Search on Add:</label>
-            <input type="checkbox" id="searchOnAdd" name="searchOnAdd" <?= !empty($settings['searchOnAdd']) ? 'checked' : '' ?>>
-            <br><br>
-            <label for="createTag">Create Tag:</label>
-            <input type="checkbox" id="createTag" name="createTag" <?= !empty($settings['createTag']) ? 'checked' : '' ?>>
-            <br><br>
-            <label for="personCast">Person Cast:</label>
-            <input type="checkbox" id="personCast" name="personCast" <?= !empty($settings['personCast']) ? 'checked' : '' ?>>
-            <br><br>
-            <label for="personDirectorCredits">Person Director Credits:</label>
-            <input type="checkbox" id="personDirectorCredits" name="personDirectorCredits" <?= !empty($settings['personDirectorCredits']) ? 'checked' : '' ?>>
-            <br><br>
-            <label for="personProducerCredits">Person Producer Credits:</label>
-            <input type="checkbox" id="personProducerCredits" name="personProducerCredits" <?= !empty($settings['personProducerCredits']) ? 'checked' : '' ?>>
-            <br><br>
-            <label for="personSoundCredits">Person Sound Credits:</label>
-            <input type="checkbox" id="personSoundCredits" name="personSoundCredits" <?= !empty($settings['personSoundCredits']) ? 'checked' : '' ?>>
-            <br><br>
-            <label for="personWritingCredits">Person Writing Credits:</label>
-            <input type="checkbox" id="personWritingCredits" name="personWritingCredits" <?= !empty($settings['personWritingCredits']) ? 'checked' : '' ?>>
-            <br><br>
-            <input type="submit" id="saveSettings" name="saveSettings" value="Save Settings">
+            <table><tr><td>
+            <div class="form-group">
+                <label for="radarrServer">Radarr Server & Port:</label>
+                <input type="text" id="radarrServer" name="radarrServer" value="<?= htmlspecialchars($settings['radarrServer'] ?? '') ?>" oninput="fetchRootFolders(); fetchQualityProfiles();">
+            </div>
+            <div class="form-group">
+                <label for="radarrApiKey">Radarr API Key:</label>
+                <input type="text" id="radarrApiKey" name="radarrApiKey" value="<?= htmlspecialchars($settings['radarrApiKey'] ?? '') ?>" oninput="fetchRootFolders(); fetchQualityProfiles();">
+            </div>
+            <div class="form-group">
+                <label for="tmdbApiKey">TMDB API Key:</label>
+                <input type="text" id="tmdbApiKey" name="tmdbApiKey" value="<?= htmlspecialchars($settings['tmdbApiKey'] ?? '') ?>">
+            </div>
+            <!-- Future functionality placeholder -->
+            <!-- <div class="form-group">
+                <label for="listNamePattern">List Name Pattern:</label>
+                <input type="text" id="listNamePattern" name="listNamePattern" value="<?= htmlspecialchars($settings['listNamePattern'] ?? '') ?>">
+            </div> -->
+            <div class="form-group">
+                <label for="rootFolderPath">Root Folder Path:</label>
+                <select id="rootFolderPath" name="rootFolderPath">
+                    <!-- Root folder options will be populated by JavaScript -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="qualityProfile">Quality Profile:</label>
+                <select id="qualityProfile" name="qualityProfile">
+                    <!-- Quality profile options will be populated by JavaScript -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="minAvailability">Minimum Availability:</label>
+                <select id="minAvailability" name="minAvailability">
+                    <option value="announced"<?= isset($settings['minAvailability']) && $settings['minAvailability'] == 'announced' ? ' selected' : '' ?>>Announced</option>
+                    <option value="in_cinemas"<?= isset($settings['minAvailability']) && $settings['minAvailability'] == 'in_cinemas' ? ' selected' : '' ?>>In Cinemas</option>
+                    <option value="released"<?= isset($settings['minAvailability']) && $settings['minAvailability'] == 'released' ? ' selected' : '' ?>>Released</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="monitor">Monitor:</label>
+                <select id="monitor" name="monitor">
+                    <option value="movieOnly" <?= isset($settings['monitor']) && $settings['monitor'] == 'movieOnly' ? 'selected' : '' ?>>Movie Only</option>
+                    <option value="movieAndCollection" <?= isset($settings['monitor']) && $settings['monitor'] == 'movieAndCollection' ? 'selected' : '' ?>>Movie and Collection</option>
+                    <option value="none" <?= isset($settings['monitor']) && $settings['monitor'] == 'none' ? 'selected' : '' ?>>None</option>
+                </select>
+            </div>
+            </td><td>
+            <div class="form-group">
+                <label><input type="checkbox" id="enableList" name="enableList" <?= !empty($settings['enableList']) ? 'checked' : '' ?>> Enable List</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="enableAutomaticAdd" name="enableAutomaticAdd" <?= !empty($settings['enableAutomaticAdd']) ? 'checked' : '' ?>> Enable Automatic Add</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="searchOnAdd" name="searchOnAdd" <?= !empty($settings['searchOnAdd']) ? 'checked' : '' ?>> Search on Add</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="createTag" name="createTag" <?= !empty($settings['createTag']) ? 'checked' : '' ?>> Create Tag</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="personCast" name="personCast" <?= !empty($settings['personCast']) ? 'checked' : '' ?>> Person Cast</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="personDirectorCredits" name="personDirectorCredits" <?= !empty($settings['personDirectorCredits']) ? 'checked' : '' ?>> Person Director Credits</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="personProducerCredits" name="personProducerCredits" <?= !empty($settings['personProducerCredits']) ? 'checked' : '' ?>> Person Producer Credits</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="personSoundCredits" name="personSoundCredits" <?= !empty($settings['personSoundCredits']) ? 'checked' : '' ?>> Person Sound Credits</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="personWritingCredits" name="personWritingCredits" <?= !empty($settings['personWritingCredits']) ? 'checked' : '' ?>> Person Writing Credits</label>
+            </div>
+            </td></tr></table>
+            <div class="form-group">
+                <input type="submit" id="saveSettings" name="saveSettings" value="Save Settings">
+            </div>
         </form>
-    </div>
+    </section>
     <?= isset($settingsSavedMessage) ? $settingsSavedMessage : '' ?>
-    <br><br>
-    <form method="POST">
+    <br>
+    <form id='actor-form' method="POST">
         <label for="actorName">Actor Name:</label>
         <input type="text" id="actorName" name="actorName" required value="<?= htmlspecialchars($_POST['actorName'] ?? '') ?>">
         <button type="submit">Search</button> <div id='radarrMessage'></div>
