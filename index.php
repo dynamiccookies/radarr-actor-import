@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $searchResults .= '<div class="grid-item">';
                 $searchResults .= '<img src="' . $actorPhoto . '" alt="' . $actorName . '" class="actor-photo">';
-                $searchResults .= '<p><a href="https://www.themoviedb.org/person/' . $actorId . '-' . str_replace(' ', '-', $actorName) . '" target="_blank">' . $actorName . '</a></p>';
+                $searchResults .= '<div class="grid-link"><a href="https://www.themoviedb.org/person/' . $actorId . '-' . str_replace(' ', '-', $actorName) . '" target="_blank">' . $actorName . '</a></div>';
                 $searchResults .= '<form method="POST">';
                 $searchResults .= '<input type="hidden" name="actorId" value="' . $actorId . '">';
                 $searchResults .= '<button type="button" name="addToRadarr" onclick="createList(\'' . $actorId . '\',\'' . $actorName . '\')">Add to Radarr</button>';
@@ -131,6 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border: 1px solid #ccc;
             padding: 10px;
         }
+        .grid-link {margin: 5px 0;}
         .actor-photo {
             width: 100%;
             height: auto;
